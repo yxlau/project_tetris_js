@@ -68,7 +68,6 @@ TETRIS.Main = (function(modules, $) {
   var _moveBlock = function(direction) {
     console.log('main._moveBlock');
     Board.clearCurrentBlockPosition(_currentBlock);
-    // Block.moveBlock(direction);
     _currentBlock.moveBlock(direction);
     Board.updateGrid(_currentBlock);
   }
@@ -81,10 +80,15 @@ TETRIS.Main = (function(modules, $) {
 
   // KeyPress registered. Move block
   var registerKeyPress = function(direction) {
-    if (Board.canMove(_currentBlock, direction)) {
+    if (direction === 90 || direction === -90) {
+      // user attempting to rotate
+      Board.clearCurrentBlockPosition(_currentBlock);
+      _currentBlock.rotate(direction);
+      Board.updateGrid(_currentBlock);
+    } else if (Board.canMove(_currentBlock, direction)) {
       _moveBlock(direction);
-      Renderer.render(Board.getGrid());
     }
+    Renderer.render(Board.getGrid());
   }
 
   var _listenForKeyPress = function() {

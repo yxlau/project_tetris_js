@@ -43,6 +43,7 @@ TETRIS.BoardModule = (function($, Helpers) {
     }
   }
 
+
   var canMove = function(block, direction) {
     var coords = block.coords;
     var movement = _direction[direction];
@@ -69,7 +70,6 @@ TETRIS.BoardModule = (function($, Helpers) {
           }
           if (newRow === coords[j].y && newCol === coords[j].x) {
             self = true;
-            continue;
           }
         }
         if (!self) {
@@ -122,6 +122,10 @@ TETRIS.BoardModule = (function($, Helpers) {
     var counter;
     for (var row = _grid.length - 1; row > 0; row--) {
       counter = 0;
+      if (_grid[row][0] === undefined) {
+        // this might speed things up a bit
+        continue;
+      }
       for (var col = 0; col < _colCount; col++) {
         if (_grid[row][col] !== undefined) {
           counter++;

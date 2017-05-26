@@ -51,6 +51,16 @@ TETRIS.BlockModule = (function(modules) {
   var Block = function Block(shape) {
     this.shape = shape || this.getRandomShape();
     this.getStartCoords();
+    this.rotation = 0;
+  }
+
+  Block.prototype.rotate = function(direction) {
+    // first coord is always the pivot
+    // ignore attempts to rotate a square. yes, A SQUARE!
+    if (this.shape === 'o') {
+      return;
+    }
+    this.coords = Helpers.rotateCoordinates(direction, this.coords);
   }
 
   Block.prototype.translate = function(x, y) {
@@ -59,7 +69,6 @@ TETRIS.BlockModule = (function(modules) {
       this.coords[i].y += y;
     }
   }
-
 
   Block.prototype.moveBlock = function(direction) {
     var movement = _direction[direction]
@@ -76,11 +85,16 @@ TETRIS.BlockModule = (function(modules) {
     return shapes[Helpers.getRandomNumber(0, 5)];
   }
 
+
   Block.prototype.getStartCoords = function() {
     // switch to array of objects
+    // first coord is rotation pivot
     switch (this.shape) {
       case 's':
         this.coords = [{
+          x: 1,
+          y: 1
+        }, {
           x: 1,
           y: 0,
         }, {
@@ -88,9 +102,6 @@ TETRIS.BlockModule = (function(modules) {
           y: 0
         }, {
           x: 0,
-          y: 1
-        }, {
-          x: 1,
           y: 1
         }]
         break;
@@ -112,43 +123,43 @@ TETRIS.BlockModule = (function(modules) {
       case 'l':
         this.coords = [{
           x: 1,
-          y: 0
-        }, {
-          x: 2,
-          y: 0
-        }, {
-          x: 2,
           y: 1
         }, {
           x: 2,
-          y: 2
+          y: 0
+        }, {
+          x: 0,
+          y: 1
+        }, {
+          x: 2,
+          y: 1
         }]
         break;
       case 'j':
         this.coords = [{
-          x: 2,
+          x: 1,
+          y: 1
+        }, {
+          x: 0,
           y: 0
         }, {
-          x: 2,
+          x: 0,
           y: 1
         }, {
           x: 2,
-          y: 2
-        }, {
-          x: 1,
-          y: 2
+          y: 1
         }]
         break;
       case 'z':
         this.coords = [{
+          x: 1,
+          y: 1
+        }, {
           x: 0,
           y: 0
         }, {
           x: 1,
           y: 0
-        }, {
-          x: 1,
-          y: 1
         }, {
           x: 2,
           y: 1
@@ -157,16 +168,16 @@ TETRIS.BlockModule = (function(modules) {
       case 'i':
         this.coords = [{
           x: 1,
-          y: 0
-        }, {
-          x: 1,
           y: 1
         }, {
-          x: 1,
-          y: 2
+          x: 0,
+          y: 1
         }, {
-          x: 1,
-          y: 3
+          x: 2,
+          y: 1
+        }, {
+          x: 3,
+          y: 1
         }]
         break;
     }

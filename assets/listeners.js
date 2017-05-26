@@ -7,7 +7,9 @@ TETRIS.ListenerMod = (function($) {
   var _reservedKeys = {
     37: 'left',
     39: 'right',
-    40: 'down'
+    40: 'down',
+    68: -90,
+    70: 90,
   }
 
   var init = function(callback) {
