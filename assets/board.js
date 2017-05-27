@@ -5,7 +5,8 @@ var TETRIS = TETRIS || {};
 TETRIS.BoardModule = (function($, Helpers) {
   var _colCount = 10;
   var _rowCount = 20;
-  var _grid;
+  var grid;
+  var permaGrid;
   var _score;
   var _direction = {
     left: {
@@ -29,20 +30,11 @@ TETRIS.BoardModule = (function($, Helpers) {
   }
 
   var _setUpGrid = function() {
-    _grid = new Array(_rowCount);
-    for (var i = 0; i < _grid.length; i++) {
-      _grid[i] = new Array(_colCount);
+    grid = new Array(_rowCount);
+    for (var i = 0; i < grid.length; i++) {
+      grid[i] = new Array(_colCount);
     }
   }
-
-  var dropBlock = function(block) {
-    for (var i = 0; i < block.coords.length; i++) {
-      var row = block.coords[i].y;
-      var col = block.coords[i].x;
-      _grid[row][col] = block.shape;
-    }
-  }
-
 
   var canMove = function(block, direction) {
     var coords = block.coords;
@@ -59,8 +51,8 @@ TETRIS.BoardModule = (function($, Helpers) {
         return false;
       }
       // check if space is taken
-      if (_grid[newRow][newCol] !== undefined) {
-        if (_grid[newRow][newCol] !== block.shape) {
+      if (grid[newRow][newCol] !== undefined) {
+        if (grid[newRow][newCol] !== block.shape) {
           // different type of block. definitely can't move
           return false;
         }
@@ -92,14 +84,16 @@ TETRIS.BoardModule = (function($, Helpers) {
   }
 
   var getGrid = function() {
-    return _grid;
+    return grid;
   }
+
 
   var updateGrid = function(block) {
     console.log('updateGrid');
     for (var i = 0; i < block.coords.length; i++) {
-      var square = block.coords[i];
-      _grid[square.y][square.x] = block.shape;
+      var row = block.coords[i].y;
+      var col = block.coords[i].x;
+      grid[row][col] = block.shape;
     }
   }
 
@@ -108,8 +102,7 @@ TETRIS.BoardModule = (function($, Helpers) {
     for (var i = 0; i < block.coords.length; i++) {
       var col = block.coords[i].x;
       var row = block.coords[i].y;
-      console.log(col, row);
-      _grid[row][col] = undefined;
+      grid[row][col] = undefined;
     }
   }
 
@@ -120,14 +113,13 @@ TETRIS.BoardModule = (function($, Helpers) {
 
   var isTetris = function() {
     var counter;
-    for (var row = _grid.length - 1; row > 0; row--) {
+    for (var row = grid.length - 1; row > 0; row--) {
       counter = 0;
-      if (_grid[row][0] === undefined) {
-        // this might speed things up a bit
+      if (grid[row][0] === undefined) {
         continue;
       }
       for (var col = 0; col < _colCount; col++) {
-        if (_grid[row][col] !== undefined) {
+        if (grid[row][col] !== undefined) {
           counter++;
         }
         if (counter === 10) {
@@ -148,17 +140,18 @@ TETRIS.BoardModule = (function($, Helpers) {
   }
 
   var _clearRows = function() {
+    // we reverse to make sure we're clearing from the bottom up
     _tetris.reverse();
     for (var i = 0; i < _tetris.length; i++) {
       var row = _tetris[i];
       // clear the row
       for (var col = 0; col < _colCount; col++) {
-        _grid[row][col] = undefined;
+        grid[row][col] = undefined;
       }
       // move everything above the row
       for (var above = row - 1; above > 0; above--) {
         for (var col = 0; col < _colCount; col++) {
-          _grid[above + 1][col] = _grid[above][col];
+          grid[above + 1][col] = grid[above][col];
         }
       }
     }
@@ -169,9 +162,13 @@ TETRIS.BoardModule = (function($, Helpers) {
     return _score;
   }
 
+  var getStartOffsetX = function() {
+    return Math.floor((_colCount - 4) / 2);
+  }
+
+
   return {
     init: init,
-    dropBlock: dropBlock,
     getGrid: getGrid,
     updateGrid: updateGrid,
     clearCurrentBlockPosition: clearCurrentBlockPosition,
@@ -180,7 +177,8 @@ TETRIS.BoardModule = (function($, Helpers) {
     isTetris: isTetris,
     tetris: tetris,
     getScore: getScore,
-    moveToStartPosition: moveToStartPosition
+    moveToStartPosition: moveToStartPosition,
+    getStartOffsetX: getStartOffsetX
   }
 
 

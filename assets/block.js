@@ -23,44 +23,68 @@ TETRIS.BlockModule = (function(modules) {
 
   var _currentBlock, _nextBlock;
 
-  // the block module is responsible for blocks
-  // it can return a block Constructor? (Block)
-  // and it can perform blockCollection-related actions, 
-  // like generating a new bag of blocks
   var _blockBag = ['j', 'i', 'o', 's', 'z', 'l'];
-  // var _blockBag = ['o'];
 
-  // replaces currentBlock
-  var getNewBlock = function() {
+  var _getNewBlock = function() {
+    var blocks = []
     if (_blockBag.length < 1) {
-      _blockBag = ['j', 'i', 'o', 's', 'z', 'l'];
-      // _blockBag = ['o', 'o'];
+      for (var i = 0; i < 4; i++) {
+        blocks.concat(_blockBag);
+      }
     }
-    var index = Helpers.getRandomNumber(0, _blockBag.length - 1);
-
-    console.log(_blockBag);
-    return _currentBlock = new Block(_blockBag.splice(index, 1)[0]);
+    var index = Helpers.getRandomNumber(0, blocks.length - 1);
+    return new Block(blocks.splice(index, 1)[0]);
   }
 
-  var moveBlock = function(direction) {
-    console.log('Block.moveBlock');
-    _currentBlock.moveBlock(direction);
+  var lineUpBlocks = function() {
+    _currentBlock = _nextBlock || _getNewBlock();
+    if (_nextBlock === _currentBlock) {
+      _nextBlock = _getNewBlock();
+    }
+  }
+  var init = function() {
+    _nextBlock = _getNewBlock();
+    lineUpBlocks();
   }
 
+  var getCurrentBlock = function() {
+    return _currentBlock;
+  }
+
+  var getNextBlock = function() {
+    return _nextBlock;
+  }
+
+
+  // ==========================================
+  // BLOCK CONSTRUCTOR 
+  // ==========================================
 
   var Block = function Block(shape) {
     this.shape = shape || this.getRandomShape();
     this.getStartCoords();
-    this.rotation = 0;
   }
 
-  Block.prototype.rotate = function(direction) {
+  Block.prototype.rotate = function(radians) {
     // first coord is always the pivot
     // ignore attempts to rotate a square. yes, A SQUARE!
     if (this.shape === 'o') {
       return;
     }
-    this.coords = Helpers.rotateCoordinates(direction, this.coords);
+    var oX = this.coords[0].x;
+    var oY = this.coords[0].y;
+    var r = radians > 0 ? [0, -1, 1, 0] : [0, 1, -1, 0];
+    for (var i = 1; i < this.coords.length; i++) {
+      var x = this.coords[i].x - oX;
+      var y = this.coords[i].y - oY;
+      this.coords[i].x = (r[0] * x) + (r[1] * y) + oX;
+      this.coords[i].y = (r[2] * x) + (r[3] * y) + oY;
+    }
+
+  }
+
+  Block.prototype.moveToStart = function(posX, posY) {
+    this.translate(posX, posY);
   }
 
   Block.prototype.translate = function(x, y) {
@@ -72,22 +96,17 @@ TETRIS.BlockModule = (function(modules) {
 
   Block.prototype.moveBlock = function(direction) {
     var movement = _direction[direction]
-    for (var i = 0; i < this.coords.length; i++) {
-      this.coords[i].x += movement.x;
-      this.coords[i].y += movement.y;
-    }
+    this.translate(movement.x, movement.y);
   }
 
-
   Block.prototype.getRandomShape = function() {
-    // this really shouldn't be used
+    // this is here as back up, but it really shouldn't be used
     var shapes = ['j', 'i', 'o', 's', 'z', 'l'];
     return shapes[Helpers.getRandomNumber(0, 5)];
   }
 
 
   Block.prototype.getStartCoords = function() {
-    // switch to array of objects
     // first coord is rotation pivot
     switch (this.shape) {
       case 's':
@@ -168,24 +187,26 @@ TETRIS.BlockModule = (function(modules) {
       case 'i':
         this.coords = [{
           x: 1,
-          y: 1
+          y: 0
         }, {
           x: 0,
-          y: 1
+          y: 0
         }, {
           x: 2,
-          y: 1
+          y: 0
         }, {
           x: 3,
-          y: 1
+          y: 0
         }]
         break;
     }
   }
 
   return {
-    getNewBlock: getNewBlock,
-    moveBlock: moveBlock,
+    getCurrentBlock: getCurrentBlock,
+    getNextBlock: getNextBlock,
+    lineUpBlocks: lineUpBlocks,
+    init: init,
   }
 
 })({

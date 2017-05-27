@@ -12,21 +12,35 @@ TETRIS.ListenerMod = (function($) {
     70: 90,
   }
 
+  var _isNoRepeats = {
+    68: true,
+    70: true,
+  }
+
+  var _repeatAttempt = false;
+
   var init = function(callback) {
     console.log('ListenerMod', 'init');
     $('#start').on('click', callback)
   }
 
   var listenForKeyPress = function(registerKeyPress) {
-    console.log('ListenerMod listenForKeyPress')
     $(document).on('keydown', function(e) {
-      if (_reservedKeys[e.keyCode]) {
-        console.log('reservedKey');
+      var key = e.keyCode
+      if (_repeatAttempt && _isNoRepeats[key]) {
+        return;
+      }
+      if (_reservedKeys[key]) {
         e.preventDefault();
         registerKeyPress(_reservedKeys[e.keyCode]);
+        _repeatAttempt = _isNoRepeats[key] ? true : false;
       }
-    })
+    });
+    $(document).on('keyup', function(e) {
+      _repeatAttempt = false;
+    });
   }
+
 
   return {
     init: init,
