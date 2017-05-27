@@ -62,24 +62,33 @@ TETRIS.BlockModule = (function(modules) {
 
   var Block = function Block(shape) {
     this.shape = shape || this.getRandomShape();
-    this.getStartCoords();
+    this.rotation = 0;
+    this.setUpCoordsArray();
+    this.generateCoordsForShape();
+    this.y = this.coords[this.rotation][0].y;
+    this.x = this.coords[this.rotation][0].x;
   }
 
-  Block.prototype.rotate = function(radians) {
-    // first coord is always the pivot
-    // ignore attempts to rotate a square. yes, A SQUARE!
-    if (this.shape === 'o') {
-      return;
+  Block.prototype.rotate = function(rotation) {
+    this.rotation += rotation;
+    if (this.rotation < 0) {
+      this.rotation = 3;
     }
-    var oX = this.coords[0].x;
-    var oY = this.coords[0].y;
-    var r = radians > 0 ? [0, -1, 1, 0] : [0, 1, -1, 0];
-    for (var i = 1; i < this.coords.length; i++) {
-      var x = this.coords[i].x - oX;
-      var y = this.coords[i].y - oY;
-      this.coords[i].x = (r[0] * x) + (r[1] * y) + oX;
-      this.coords[i].y = (r[2] * x) + (r[3] * y) + oY;
+    if (this.rotation > 3) {
+      this.rotation = 0;
     }
+  }
+
+  Block.prototype.getCurrentCoords = function() {
+    var coords = [];
+    var current = this.coords[this.rotation];
+    for (var i = 0; i < this.coords[this.rotation].length; i++) {
+      coords.push({
+        x: current[i].x + this.x,
+        y: current[i].y + this.y
+      })
+    }
+    return coords;
   }
 
   Block.prototype.moveToStart = function(posX, posY) {
@@ -87,10 +96,12 @@ TETRIS.BlockModule = (function(modules) {
   }
 
   Block.prototype.translate = function(x, y) {
-    for (var i = 0; i < this.coords.length; i++) {
-      this.coords[i].x += x;
-      this.coords[i].y += y;
-    }
+    // for (var i = 0; i < this.coords.length; i++) {
+    //   this.coords[i].x += x;
+    //   this.coords[i].y += y;
+    // }
+    this.x += x;
+    this.y += y;
   }
 
   Block.prototype.moveBlock = function(direction) {
@@ -106,19 +117,55 @@ TETRIS.BlockModule = (function(modules) {
 
   Block.prototype.rotationSpace = function(direction) {
     // should return coords needed to rotate in given direction
-    var oCoords = this.coords;
-    this.rotate(direction);
-    var rotated = $.extend(true, {}, this.coords);
-    this.coords = oCoords;
-    return rotated;
+    var current = this.coords[this.rotation]
+  }
+
+  Block.prototype.setUpCoordsArray = function() {
+    this.coords = new Array(4);
+    for (var i = 0; i < 4; i++) {
+      this.coords[i] = new Array();
+    }
+  }
+
+  Block.prototype.generateCoordsForShape = function() {
+
+    var startCoords = this.getStartCoords();
+    if (this.shape == 'o') {
+      this.coords[0] = startCoords;
+      return;
+    }
+    var transformations = [
+      [0, -1, 1, 0],
+      [-1, 0, 0, -1],
+      [0, 1, -1, 0]
+    ];
+    var oX = startCoords[0].x
+    var oY = startCoords[0].y;
+    for (var t = 0; t < transformations.length; t++) {
+      for (var j = 0; j < startCoords.length; j++) {
+        this.coords[t + 1].push({
+          x: (transformations[t][0] * (startCoords[j].x - oX)) + (transformations[t][1] * (startCoords[j].y - oY)) + oX,
+          y: (transformations[t][2] * (startCoords[j].x - oX)) + (transformations[t][3] * (startCoords[j].y - oY)) + oX
+        })
+      }
+    }
+    this.coords[0] = startCoords;
+  }
+
+  Block.prototype.rotatable = function() {
+    return (this.shape !== 'o');
   }
 
 
+
+
   Block.prototype.getStartCoords = function() {
+    // rename this to master coords
     // first coord is rotation pivot
+    var coords;
     switch (this.shape) {
       case 's':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 1
         }, {
@@ -133,7 +180,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
       case 'o':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 0
         }, {
@@ -148,7 +195,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
       case 'l':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 1
         }, {
@@ -163,7 +210,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
       case 'j':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 1
         }, {
@@ -178,7 +225,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
       case 'z':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 1
         }, {
@@ -193,7 +240,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
       case 'i':
-        this.coords = [{
+        coords = [{
           x: 1,
           y: 0
         }, {
@@ -208,6 +255,7 @@ TETRIS.BlockModule = (function(modules) {
         }]
         break;
     }
+    return coords;
   }
 
   return {

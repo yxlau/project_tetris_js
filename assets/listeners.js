@@ -12,8 +12,8 @@ TETRIS.ListenerMod = (function($) {
   }
 
   var _rotationKey = {
-    68: -90,
-    70: 90,
+    68: -1,
+    70: 1
   }
 
   var _isNoRepeats = {

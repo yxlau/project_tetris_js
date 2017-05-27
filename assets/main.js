@@ -108,9 +108,13 @@ TETRIS.Main = (function(modules, $) {
   }
 
   var _registerRotation = function(direction) {
-    // if (Board.canRotate(_currentBlock, direction)) {
-    _rotateBlock(direction);
-    // }
+    if (!_currentBlock.rotatable()) {
+      return false;
+    }
+    console.warn('rotation attempt', direction);
+    if (Board.canRotate(_currentBlock, direction)) {
+      _rotateBlock(direction);
+    }
     Renderer.render(Board.getGrid());
   }
 

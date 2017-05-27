@@ -37,7 +37,7 @@ TETRIS.BoardModule = (function($, Helpers) {
   }
 
   var canMove = function(block, direction) {
-    var coords = block.coords;
+    var coords = block.getCurrentCoords();
     var movement = _direction[direction];
     // iterate through each square of block
     for (var i = 0; i < coords.length; i++) {
@@ -74,10 +74,34 @@ TETRIS.BoardModule = (function($, Helpers) {
   }
 
   var canRotate = function(block, direction) {
-    var spaceNeeded = block.rotationSpace(direction);
+    console.log('canroate');
+    var direction = direction + block.rotation;
+    if (direction < 0) {
+      direction = 3
+    }
+    if (direction = 4) {
+      direction = 0;
+    }
+    var spaceNeeded = block.coords[direction];
     for (var i = 0; i < spaceNeeded.length; i++) {
-      if (grid[spaceNeeded[i].y][spaceNeeded[i].x] !== undefined) {
+      var self = false;
+      var row = spaceNeeded[i].y + block.y;
+      var col = spaceNeeded[i].x + block.x;
+      if (row > 19 || row < 0 || col < 0 || col > 9) {
         return false;
+      }
+      if (grid[row][col] !== undefined) {
+        if (grid[row][col] !== block.shape) {
+          return false;
+        }
+        for (var j = 0; j < spaceNeeded.length; j++) {
+          if (row === spaceNeeded[j].y + block.y && col === spaceNeeded[j].x + block.x) {
+            self = true;
+          }
+        }
+        if (!self) {
+          return false;
+        }
       }
     }
     return true;
@@ -100,18 +124,20 @@ TETRIS.BoardModule = (function($, Helpers) {
 
   var updateGrid = function(block) {
     console.log('updateGrid');
-    for (var i = 0; i < block.coords.length; i++) {
-      var row = block.coords[i].y;
-      var col = block.coords[i].x;
+    var coords = block.getCurrentCoords();
+    for (var i = 0; i < coords.length; i++) {
+      var row = coords[i].y;
+      var col = coords[i].x;
       grid[row][col] = block.shape;
     }
   }
 
   var clearCurrentBlockPosition = function(block) {
     console.log('clearCurrentBlockPosition');
-    for (var i = 0; i < block.coords.length; i++) {
-      var col = block.coords[i].x;
-      var row = block.coords[i].y;
+    var coords = block.getCurrentCoords();
+    for (var i = 0; i < coords.length; i++) {
+      var col = coords[i].x;
+      var row = coords[i].y;
       grid[row][col] = undefined;
     }
   }
