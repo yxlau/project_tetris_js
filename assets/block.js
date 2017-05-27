@@ -5,6 +5,7 @@ var TETRIS = TETRIS || {}
 TETRIS.BlockModule = (function(modules) {
 
   var Helpers = modules.helpers
+  var _counter;
 
   var _direction = {
     left: {
@@ -22,18 +23,20 @@ TETRIS.BlockModule = (function(modules) {
   };
 
   var _currentBlock, _nextBlock;
+  var _blocks = [];
+  var _blockBag = ['j', 'i', 'o', 's', 'z', 'l', 't'];
 
-  var _blockBag = ['j', 'i', 'o', 's', 'z', 'l'];
 
   var _getNewBlock = function() {
-    var blocks = []
-    if (_blockBag.length < 1) {
-      for (var i = 0; i < 4; i++) {
-        blocks.concat(_blockBag);
+    if (_blocks.length < 1) {
+      for (var i = 0; i < 2; i++) {
+        _blocks = _blocks.concat(_blockBag);
       }
     }
-    var index = Helpers.getRandomNumber(0, blocks.length - 1);
-    return new Block(blocks.splice(index, 1)[0]);
+    var index = Helpers.getRandomNumber(0, _blocks.length - 1);
+    var newBlock = new Block(_blocks.splice(index, 1)[0], _counter);
+    _counter += 1;
+    return newBlock;
   }
 
   var lineUpBlocks = function() {
@@ -43,6 +46,8 @@ TETRIS.BlockModule = (function(modules) {
     }
   }
   var init = function() {
+    _currentBlock = undefined;
+    _counter = 0;
     _nextBlock = _getNewBlock();
     lineUpBlocks();
   }
@@ -60,12 +65,13 @@ TETRIS.BlockModule = (function(modules) {
   // BLOCK CONSTRUCTOR 
   // ==========================================
 
-  var Block = function Block(shape) {
+  var Block = function Block(shape, id) {
+    this.id = id || 0;
     this.shape = shape || this.getRandomShape();
     this.rotation = 0;
     this.setUpCoordsArray();
     this.generateCoordsForShape();
-    this.y = this.coords[this.rotation][0].y;
+    this.y = 0;
     this.x = this.coords[this.rotation][0].x;
   }
 
@@ -96,10 +102,6 @@ TETRIS.BlockModule = (function(modules) {
   }
 
   Block.prototype.translate = function(x, y) {
-    // for (var i = 0; i < this.coords.length; i++) {
-    //   this.coords[i].x += x;
-    //   this.coords[i].y += y;
-    // }
     this.x += x;
     this.y += y;
   }
@@ -111,7 +113,7 @@ TETRIS.BlockModule = (function(modules) {
 
   Block.prototype.getRandomShape = function() {
     // this is here as back up, but it really shouldn't be used
-    var shapes = ['j', 'i', 'o', 's', 'z', 'l'];
+    var shapes = ['j', 'i', 'o', 's', 'z', 'l', 't'];
     return shapes[Helpers.getRandomNumber(0, 5)];
   }
 
@@ -155,9 +157,6 @@ TETRIS.BlockModule = (function(modules) {
   Block.prototype.rotatable = function() {
     return (this.shape !== 'o');
   }
-
-
-
 
   Block.prototype.getStartCoords = function() {
     // rename this to master coords
@@ -252,6 +251,21 @@ TETRIS.BlockModule = (function(modules) {
         }, {
           x: 3,
           y: 0
+        }]
+        break;
+      case 't':
+        coords = [{
+          x: 1,
+          y: 1
+        }, {
+          x: 1,
+          y: 0
+        }, {
+          x: 0,
+          y: 1
+        }, {
+          x: 2,
+          y: 1
         }]
         break;
     }

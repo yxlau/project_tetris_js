@@ -16,12 +16,13 @@ TETRIS.RendererModule = (function() {
   var _nextHeight = 150;
 
   var _colours = {
-    s: '#22a2c9',
-    i: '#3d8fd1',
-    j: '#6679cc',
-    l: '#ac9739',
-    o: '#9c637a',
-    z: '#c94922',
+    s: '#34495E',
+    i: '#F1C40F',
+    j: '#9B59B6',
+    l: '#1ABC9C',
+    o: '#E67E22',
+    z: '#3498DB',
+    t: '#E74C3C'
   };
 
   var init = function() {
@@ -31,7 +32,7 @@ TETRIS.RendererModule = (function() {
     _nextCtx = $('#next-block')[0].getContext('2d');
   }
 
-  var render = function(grid, block, delta) {
+  var render = function(grid) {
     _ctx.clearRect(0, 0, _width, _height);
     for (var row = 0; row < grid.length; row++) {
       for (var col = 0; col < _colCount; col++) {
@@ -41,7 +42,7 @@ TETRIS.RendererModule = (function() {
           var y = _pixelate(row);
           _ctx.beginPath();
           _ctx.strokeStyle = 'white';
-          _ctx.fillStyle = _colours[grid[row][col]];
+          _ctx.fillStyle = _colours[grid[row][col].shape];
           _ctx.strokeRect(x, y, _pixel, _pixel);
           _ctx.fillRect(_pixel * col, _pixel * row, _pixel, _pixel);
         }
@@ -59,11 +60,11 @@ TETRIS.RendererModule = (function() {
   }
 
   var updateNextBlock = function(block) {
-    var coords = block.coords;
+    var coords = block.getCurrentCoords();
     var unit = 100 / 4;
     _nextCtx.clearRect(0, 0, _nextWidth, _nextHeight);
     for (var i = 0; i < coords.length; i++) {
-      var x = (coords[i].x) * unit;
+      var x = (coords[i].x) * unit - unit;
       var y = (coords[i].y) * unit;
       _nextCtx.beginPath();
       _nextCtx.strokeStyle = 'white';
@@ -74,16 +75,25 @@ TETRIS.RendererModule = (function() {
   }
 
   var gameOver = function() {
-    _nextCtx.clearRect(0, 0, _nextWidth, _nextHeight);
-    _ctx.clearRect(0, 0, _width, _height);
-    _ctx.font = "20px Georgia";
-    _ctx.fillStyle = 'white';
-    _ctx.fillText("Hello World!", 10, 50);
+    _ctx.fillStyle = 'rgba(230, 230, 230, 0.9)';
+    _ctx.fillRect(0, 0, _width, _height);
+    _nextCtx.fillStyle = 'rgba(230, 230, 230, 0.9)';
+    _nextCtx.fillRect(0, 0, _width, _height);
+    _ctx.fillStyle = '#333';
+    _ctx.textAlign = 'center';
+    _ctx.font = '30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+    _ctx.fillText('GAME OVER', _width / 2, _height / 2);
 
   }
 
   var getPixelsPerSquare = function() {
     return _pixel;
+  }
+
+  var clearCanvases = function() {
+    _ctx.clearRect(0, 0, _width, _height);
+    _nextCtx.clearRect(0, 0, _nextWidth, _nextHeight);
+    _$score.text('0');
   }
 
   return {
@@ -92,7 +102,8 @@ TETRIS.RendererModule = (function() {
     updateScore: updateScore,
     updateNextBlock: updateNextBlock,
     getPixelsPerSquare: getPixelsPerSquare,
-    gameOver: gameOver
+    gameOver: gameOver,
+    clearCanvases: clearCanvases
   }
 
 

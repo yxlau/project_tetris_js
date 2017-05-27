@@ -9,15 +9,20 @@ main {
 
 aside {
   float: right;
+  width: 150px;
+}
+
+#message {
+  font-size:12px;
 }
 
 #next-block {
-  background: #f5f7ff;
+  background: #f5f5f5;
   margin: 20px auto;
 }
 
 #board {
-  background: #f5f7ff;
+  background: #f5f5f5;
   margin: 20px auto;
 }
 

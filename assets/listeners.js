@@ -1,5 +1,4 @@
 "use strict";
-console.log('listeners loaded');
 var TETRIS = TETRIS || {};
 
 TETRIS.ListenerMod = (function($) {
@@ -8,7 +7,6 @@ TETRIS.ListenerMod = (function($) {
     37: 'left',
     39: 'right',
     40: 'down',
-
   }
 
   var _rotationKey = {
@@ -16,16 +14,30 @@ TETRIS.ListenerMod = (function($) {
     70: 1
   }
 
-  var _isNoRepeats = {
-    68: true,
-    70: true,
-  }
-
   var _repeatAttempt = false;
 
-  var init = function(callback) {
-    console.log('ListenerMod', 'init');
-    $('#start').on('click', callback)
+  var init = function(startGame) {
+    $('#start').on('click', startGame);
+  }
+
+
+
+  var _keyPressHandler = function(e) {
+    var key = e.keyCode
+    if (_directionKey[key]) {
+      e.preventDefault();
+      callbacks.registerMove(_directionKey[key]);
+    } else if (_rotationKey[key]) {
+      e.preventDefault();
+      if (!_repeatAttempt) {
+        callbacks.registerRotation(_rotationKey[key]);
+        _repeatAttempt = true;
+      }
+    }
+  }
+
+  var disableStart = function() {
+    $('#start').off('click');
   }
 
   var listenForKeyPress = function(callbacks) {
@@ -50,6 +62,7 @@ TETRIS.ListenerMod = (function($) {
 
   return {
     init: init,
-    listenForKeyPress: listenForKeyPress
+    listenForKeyPress: listenForKeyPress,
+    disableStart: disableStart
   }
 })($);

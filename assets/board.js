@@ -22,10 +22,12 @@ TETRIS.BoardModule = (function($, Helpers) {
       y: 1
     }
   };
-  var _tetris = [];
+  var _tetris;
+
 
   var init = function() {
     _score = 0;
+    _tetris = [];
     _setUpGrid();
   }
 
@@ -41,7 +43,6 @@ TETRIS.BoardModule = (function($, Helpers) {
     var movement = _direction[direction];
     // iterate through each square of block
     for (var i = 0; i < coords.length; i++) {
-      var self = false;
       var row = coords[i].y;
       var col = coords[i].x;
       var newRow = row + movement.y;
@@ -52,54 +53,31 @@ TETRIS.BoardModule = (function($, Helpers) {
       }
       // check if space is taken
       if (grid[newRow][newCol] !== undefined) {
-        if (grid[newRow][newCol] !== block.shape) {
-          // different type of block. definitely can't move
+        if (grid[newRow][newCol].id !== block.id) {
           return false;
         }
-        for (var j = 0; j < coords.length; j++) {
-          if (j === i) {
-            continue;
-          }
-          if (newRow === coords[j].y && newCol === coords[j].x) {
-            self = true;
-          }
-        }
-        if (!self) {
-          return false;
-        }
-
       }
     }
     return true;
   }
 
-  var canRotate = function(block, direction) {
-    console.log('canroate');
-    var direction = direction + block.rotation;
+  var canRotate = function(block, rotation) {
+    var direction = rotation + block.rotation;
     if (direction < 0) {
       direction = 3
     }
-    if (direction = 4) {
+    if (direction === 4) {
       direction = 0;
     }
     var spaceNeeded = block.coords[direction];
     for (var i = 0; i < spaceNeeded.length; i++) {
-      var self = false;
       var row = spaceNeeded[i].y + block.y;
       var col = spaceNeeded[i].x + block.x;
       if (row > 19 || row < 0 || col < 0 || col > 9) {
         return false;
       }
       if (grid[row][col] !== undefined) {
-        if (grid[row][col] !== block.shape) {
-          return false;
-        }
-        for (var j = 0; j < spaceNeeded.length; j++) {
-          if (row === spaceNeeded[j].y + block.y && col === spaceNeeded[j].x + block.x) {
-            self = true;
-          }
-        }
-        if (!self) {
+        if (grid[row][col].id !== block.id) {
           return false;
         }
       }
@@ -109,8 +87,9 @@ TETRIS.BoardModule = (function($, Helpers) {
 
 
   var gameOver = function(block) {
-    for (var i = 0; i < block.coords.length; i++) {
-      if (block.coords[i].y === 0) {
+    var coords = block.getCurrentCoords();
+    for (var i = 0; i < coords.length; i++) {
+      if (coords[i].y + block.y < 2) {
         return true;
       }
     }
@@ -123,17 +102,18 @@ TETRIS.BoardModule = (function($, Helpers) {
 
 
   var updateGrid = function(block) {
-    console.log('updateGrid');
     var coords = block.getCurrentCoords();
     for (var i = 0; i < coords.length; i++) {
       var row = coords[i].y;
       var col = coords[i].x;
-      grid[row][col] = block.shape;
+      grid[row][col] = {
+        shape: block.shape,
+        id: block.id
+      };
     }
   }
 
   var clearCurrentBlockPosition = function(block) {
-    console.log('clearCurrentBlockPosition');
     var coords = block.getCurrentCoords();
     for (var i = 0; i < coords.length; i++) {
       var col = coords[i].x;
@@ -198,11 +178,6 @@ TETRIS.BoardModule = (function($, Helpers) {
     return _score;
   }
 
-  var getStartOffsetX = function() {
-    return Math.floor((_colCount - 4) / 2);
-  }
-
-
   return {
     init: init,
     getGrid: getGrid,
@@ -214,7 +189,6 @@ TETRIS.BoardModule = (function($, Helpers) {
     tetris: tetris,
     getScore: getScore,
     moveToStartPosition: moveToStartPosition,
-    getStartOffsetX: getStartOffsetX,
     canRotate: canRotate
   }
 
