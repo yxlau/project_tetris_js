@@ -73,6 +73,16 @@ TETRIS.BoardModule = (function($, Helpers) {
     return true;
   }
 
+  var canRotate = function(block, direction) {
+    var spaceNeeded = block.rotationSpace(direction);
+    for (var i = 0; i < spaceNeeded.length; i++) {
+      if (grid[spaceNeeded[i].y][spaceNeeded[i].x] !== undefined) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 
   var gameOver = function(block) {
     for (var i = 0; i < block.coords.length; i++) {
@@ -178,7 +188,8 @@ TETRIS.BoardModule = (function($, Helpers) {
     tetris: tetris,
     getScore: getScore,
     moveToStartPosition: moveToStartPosition,
-    getStartOffsetX: getStartOffsetX
+    getStartOffsetX: getStartOffsetX,
+    canRotate: canRotate
   }
 
 

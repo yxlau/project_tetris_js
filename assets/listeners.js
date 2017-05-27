@@ -4,10 +4,14 @@ var TETRIS = TETRIS || {};
 
 TETRIS.ListenerMod = (function($) {
 
-  var _reservedKeys = {
+  var _directionKey = {
     37: 'left',
     39: 'right',
     40: 'down',
+
+  }
+
+  var _rotationKey = {
     68: -90,
     70: 90,
   }
@@ -24,16 +28,18 @@ TETRIS.ListenerMod = (function($) {
     $('#start').on('click', callback)
   }
 
-  var listenForKeyPress = function(registerKeyPress) {
+  var listenForKeyPress = function(callbacks) {
     $(document).on('keydown', function(e) {
       var key = e.keyCode
-      if (_repeatAttempt && _isNoRepeats[key]) {
-        return;
-      }
-      if (_reservedKeys[key]) {
+      if (_directionKey[key]) {
         e.preventDefault();
-        registerKeyPress(_reservedKeys[e.keyCode]);
-        _repeatAttempt = _isNoRepeats[key] ? true : false;
+        callbacks.registerMove(_directionKey[key]);
+      } else if (_rotationKey[key]) {
+        e.preventDefault();
+        if (!_repeatAttempt) {
+          callbacks.registerRotation(_rotationKey[key]);
+          _repeatAttempt = true;
+        }
       }
     });
     $(document).on('keyup', function(e) {

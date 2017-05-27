@@ -80,7 +80,6 @@ TETRIS.BlockModule = (function(modules) {
       this.coords[i].x = (r[0] * x) + (r[1] * y) + oX;
       this.coords[i].y = (r[2] * x) + (r[3] * y) + oY;
     }
-
   }
 
   Block.prototype.moveToStart = function(posX, posY) {
@@ -103,6 +102,15 @@ TETRIS.BlockModule = (function(modules) {
     // this is here as back up, but it really shouldn't be used
     var shapes = ['j', 'i', 'o', 's', 'z', 'l'];
     return shapes[Helpers.getRandomNumber(0, 5)];
+  }
+
+  Block.prototype.rotationSpace = function(direction) {
+    // should return coords needed to rotate in given direction
+    var oCoords = this.coords;
+    this.rotate(direction);
+    var rotated = $.extend(true, {}, this.coords);
+    this.coords = oCoords;
+    return rotated;
   }
 
 

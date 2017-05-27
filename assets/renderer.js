@@ -16,12 +16,12 @@ TETRIS.RendererModule = (function() {
   var _nextHeight = 150;
 
   var _colours = {
-    s: 'green',
-    i: 'turquoise',
-    j: 'blue',
-    l: 'orange',
-    o: 'yellow',
-    z: 'red',
+    s: '#22a2c9',
+    i: '#3d8fd1',
+    j: '#6679cc',
+    l: '#ac9739',
+    o: '#9c637a',
+    z: '#c94922',
   };
 
   var init = function() {
@@ -40,21 +40,22 @@ TETRIS.RendererModule = (function() {
           var x = _pixelate(col);
           var y = _pixelate(row);
           _ctx.beginPath();
+          _ctx.strokeStyle = 'white';
           _ctx.fillStyle = _colours[grid[row][col]];
-          _ctx.fillRect(x, y, _pixel, _pixel);
+          _ctx.strokeRect(x, y, _pixel, _pixel);
+          _ctx.fillRect(_pixel * col, _pixel * row, _pixel, _pixel);
         }
       }
     }
-    _ctx.fill();
-    _ctx.stroke();
   }
+
 
   var updateScore = function(score) {
     _$score.text(score);
   }
 
   var _pixelate = function(unit) {
-    return unit * _pixel + 0.5;
+    return unit * _pixel;
   }
 
   var updateNextBlock = function(block) {
@@ -64,19 +65,21 @@ TETRIS.RendererModule = (function() {
     for (var i = 0; i < coords.length; i++) {
       var x = (coords[i].x) * unit;
       var y = (coords[i].y) * unit;
-      console.log('next', x, y);
       _nextCtx.beginPath();
+      _nextCtx.strokeStyle = 'white';
       _nextCtx.fillStyle = _colours[block.shape];
-      _nextCtx.fillRect(x + 0.5, y + 0.5, unit, unit);
-      _nextCtx.strokeStyle = 'black';
+      _nextCtx.fillRect(x, y, unit, unit);
+      _nextCtx.strokeRect(x + 0.5, y + 0.5, unit, unit);
     }
-    _nextCtx.fill();
-    _nextCtx.stroke();
   }
 
   var gameOver = function() {
     _nextCtx.clearRect(0, 0, _nextWidth, _nextHeight);
-    _ctx.clearRext(0, 0, _width, _height);
+    _ctx.clearRect(0, 0, _width, _height);
+    _ctx.font = "20px Georgia";
+    _ctx.fillStyle = 'white';
+    _ctx.fillText("Hello World!", 10, 50);
+
   }
 
   var getPixelsPerSquare = function() {
@@ -88,7 +91,8 @@ TETRIS.RendererModule = (function() {
     render: render,
     updateScore: updateScore,
     updateNextBlock: updateNextBlock,
-    getPixelsPerSquare: getPixelsPerSquare
+    getPixelsPerSquare: getPixelsPerSquare,
+    gameOver: gameOver
   }
 
 

@@ -17,33 +17,50 @@ TETRIS.Main = (function(modules, $) {
   var _fps = 100;
 
   var init = function() {
+
     console.log('Main.init');
     Listener.init(_startGame);
     Board.init();
     Renderer.init();
     Block.init();
-    // FIX THIS
     _interval = 1000 / _fps;
   }
 
   var _runGame = function() {
     _animator = window.requestAnimationFrame(_runGame);
     _now = Date.now();
-    _delta = (_now - _then) / 100;
 
-    if (!Board.canMove(_currentBlock, 'down')) {
-      if (Board.gameOver(_currentBlock)) {
-        return _gameOver();
-      }
-      _checkTetris();
-      _setUpNewBlock();
-    } else {
-      if (_delta > _interval) {
+    _delta = (_now - _then) / 100;
+    // if (!Board.canMove(_currentBlock, 'down')) {
+    //   if (Board.gameOver(_currentBlock)) {
+    //     return _gameOver();
+    //   }
+    //   _checkTetris();
+    //   if (_delta > 5) {
+
+    //     _setUpNewBlock();
+    //   }
+    // } else {
+    //   if (_delta > _interval) {
+    //     if (Board.canMove(_currentBlock, 'down')) {
+    //       _moveBlock('down');
+    //     }
+    //     _then = _now - (_delta % _interval);
+    //   }
+    // }
+    if (_delta > _interval) {
+      if (Board.canMove(_currentBlock, 'down')) {
         _moveBlock('down');
-        _then = _now - (_delta % _interval);
+      } else {
+        if (Board.gameOver(_currentBlock)) {
+          return _gameOver();
+        }
+        _checkTetris();
+        _setUpNewBlock();
       }
+      _then = _now - (_delta % _interval);
+      Renderer.render(Board.getGrid());
     }
-    Renderer.render(Board.getGrid());
   }
 
   var _setUpNewBlock = function() {
@@ -55,14 +72,6 @@ TETRIS.Main = (function(modules, $) {
     Renderer.updateNextBlock(_nextBlock);
   }
 
-  var _checkGameOver = function() {
-    if (Board.gameOver(_currentBlock)) {
-      console.log('gameOver');
-      _gameOver();
-      return;
-    }
-  }
-
   var _checkTetris = function() {
     if (Board.isTetris()) {
       Board.tetris();
@@ -72,6 +81,7 @@ TETRIS.Main = (function(modules, $) {
 
   var _gameOver = function() {
     console.warn('Game Over');
+    Renderer.gameOver();
     window.cancelAnimationFrame(_animator);
   }
 
@@ -84,15 +94,23 @@ TETRIS.Main = (function(modules, $) {
 
   var registerKeyPress = function(direction) {
     console.log('keyPress');
-    if (!isNaN(direction)) {
-      _rotateBlock(direction);
-    } else if (Board.canMove(_currentBlock, direction)) {
+    _register
+    Renderer.render(Board.getGrid());
+  }
+
+  var _registerMove = function(direction) {
+    console.log('registerMove');
+    if (Board.canMove(_currentBlock, direction)) {
+      console.warn('canmove');
       _moveBlock(direction);
     }
-    if (!Board.canMove(_currentBlock, 'down')) {
+    Renderer.render(Board.getGrid());
+  }
 
-    }
-
+  var _registerRotation = function(direction) {
+    // if (Board.canRotate(_currentBlock, direction)) {
+    _rotateBlock(direction);
+    // }
     Renderer.render(Board.getGrid());
   }
 
@@ -103,7 +121,15 @@ TETRIS.Main = (function(modules, $) {
   }
 
   var _listenForKeyPress = function() {
-    Listener.listenForKeyPress(registerKeyPress);
+    Listener.listenForKeyPress({
+      registerMove: _registerMove,
+      registerRotation: _registerRotation
+    });
+  }
+
+  var _relinquishControl = function() {
+    Listener.relinquishControl();
+
   }
 
   var _startGame = function() {
