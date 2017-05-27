@@ -64,6 +64,9 @@ TETRIS.Main = (function(modules, $) {
       _interval = 8;
     }
     if (score >= 50) {
+      _interval = 8.5;
+    }
+    if (score >= 10) {
       _interval = 9;
     }
   }
